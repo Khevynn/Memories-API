@@ -17,7 +17,6 @@ app.use("/users", usersRouter);
 app.use("/pets", petsRouter);
 
 // When we don't find anything
-
 app.use((req, res, next) => {
   res.status(404).send({ msg: "No resource or page found." });
 })
