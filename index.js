@@ -10,9 +10,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// const usersRouter = require("./routes/usersRoutes");
+const usersRouter = require("./routes/usersRoutes");
+const petsRouter = require("./routes/petsRoutes");
 
-// app.use("/api/users", usersRouter);
+app.use("/users", usersRouter);
+app.use("/pets", petsRouter);
 
 // When we don't find anything
 
