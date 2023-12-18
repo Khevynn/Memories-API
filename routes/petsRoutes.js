@@ -76,4 +76,34 @@ router.patch("/changeName", async function(req,res,next){
     }
 });
 
+router.patch("/feed", async function(req,res,next){
+    try{
+        let result = await Pet.ChangeStats("Feed", req.body.user_id);
+        res.status(result.status).send(result.data);
+    } catch(err){
+        console.log(err);
+        res.status(500).send(err);
+    }
+});
+
+router.patch("/bath", async function(req,res,next){
+    try{
+        let result = await Pet.ChangeStats("Bath", req.body.user_id);
+        res.status(result.status).send(result.data);
+    } catch(err){
+        console.log(err);
+        res.status(500).send(err);
+    }
+});
+
+
+router.patch("/exercise", async function(req,res,next){
+    try{
+        let result = await Pet.ChangeStats("Exercise", req.body.user_id);
+        res.status(result.status).send(result.data);
+    } catch(err){
+        console.log(err);
+        res.status(500).send(err);
+    }
+});
 module.exports = router;

@@ -3,13 +3,13 @@ const User = require("./usersModel");
 const Consts = require("../config/Consts");
 
 class Pet{
-    constructor(id, name, user_id, hungry, happiness, fitness, state, humor){
+    constructor(id, name, user_id, hungry, happiness, hygiene, state, humor){
         this.id = id;
         this.name = name
         this.user_id = user_id;
         this.hungry = hungry;
         this.happiness = happiness;
-        this.fitness = fitness;
+        this.hygiene = hygiene;
         this.state = state;
         this.humor = humor;
     }
@@ -34,7 +34,7 @@ class Pet{
                         pet.up_user_id, 
                         pet.up_hungry, 
                         pet.up_happiness, 
-                        pet.up_fitness, 
+                        pet.up_hygiene, 
                         new PetState(pet.ps_id, pet.ps_name),
                         new PetHumor(pet.ph_id, pet.ph_name)
                     )
@@ -66,7 +66,7 @@ class Pet{
             pet.name = pets[0].up_pet_name;
             pet.hungry = pets[0].up_hungry;
             pet.happiness = pets[0].up_happiness;
-            pet.fitness = pets[0].up_fitness;
+            pet.hygiene = pets[0].up_hygiene;
             pet.state = new PetState(pets[0].ps_id, pets[0].ps_name);
             pet.humor = new PetHumor(pets[0].ph_id, pets[0].ph_name);
 
@@ -149,7 +149,7 @@ class Pet{
         }
     }
 
-    static async ChangeStats(Action){
+    static async ChangeStats(Action, user_id){
         try{
             let [pet] = await pool.query(`select * from user_pet, user, pet_state, pet_humor
                                             where up_user_id = usr_id and
@@ -163,17 +163,20 @@ class Pet{
             
             let userInfo = new User();
             userInfo.fruits = pet[0].usr_fruits;
+            userInfo.currentPetInfo = pet[0].usr_current_pet;
                 
             let currentPetInfo = new Pet();
             currentPetInfo.id = pet[0].up_pet_id;
             currentPetInfo.user_id = pet[0].up_user_id;
             currentPetInfo.hungry = pet[0].up_hungry;
             currentPetInfo.happiness = pet[0].up_happiness;
-            currentPetInfo.fitness = pet[0].up_fitness;
+            currentPetInfo.hygiene = pet[0].up_hygiene;
             currentPetInfo.state = new PetState(pet[0].ps_id, pet[0].ps_name);
             currentPetInfo.humor = new PetHumor(pet[0].ph_id, pet[0].ph_name);
 
             let newPetInfo = new Pet();
+            newPetInfo.state = currentPetInfo.state;
+            newPetInfo.humor = currentPetInfo.humor;
 
             switch(Action){
                 case "Feed":
@@ -181,22 +184,51 @@ class Pet{
                         return{status: 403, data: {msg: "Pet already fed!"}}
         
                     if(pet[0].usr_fruits <= 0)
-                        return{status: 403, data: {msg: "Not enough fruits!"}}
+                        return{status: 412, data: {msg: "Not enough fruits!"}}
         
                     newPetInfo.hungry = currentPetInfo.hungry + 5;
+                    if(newPetInfo.hungry > 100) newPetInfo.hungry = 100;
+
                     userInfo.fruits--;
-        
-                    await pool.query(`update user_pet set up_hungry = ? where up_usr_id = ? and up_pet_id = ?`, [newHungry, user_id, currentPetInfo.id]);
-        
-                    await pool.query(`update user set usr_fruits = ? where usr_id = ?`, [newFruits, user_id]);
                 break;
                 case "Exercise":
-                    //TODO
+                    if(currentPetInfo.fitness >= 100)
+                        return{status: 403, data: {msg: "Pet already exercised!"}}
+
+                    if(currentPetInfo.hungry <= 2)
+                        return{status: 412, data: {msg: "Can't exercise a hungry pet!"}}
+
+                    newPetInfo.happiness = currentPetInfo.happiness + 2;
+                    if(newPetInfo.happiness > 100) newPetInfo.happiness = 100;
+
+                    newPetInfo.hungry = currentPetInfo.hungry - 2;
+                    if(newPetInfo.hungry < 0) newPetInfo.hungry = 0;
+
+                    newPetInfo.hygiene = currentPetInfo.hygiene - 2;
+                    if(newPetInfo.hygiene < 0) newPetInfo.hygiene = 0;
                 break;
                 case "Bath":
-                    //TODO
+                    if(currentPetInfo.hygiene >= 100)
+                        return{status: 403, data: {msg: "Pet already clean!"}}
+
+                    newPetInfo.hygiene = currentPetInfo.hygiene + 2;
+                    if(newPetInfo.hygiene > 100) newPetInfo.hygiene = 100;
                 break;
             }
+
+            if(currentPetInfo.humor.name == "Sad" && newPetInfo.happiness >= Consts.HAPPINESS_VALUE_CHANGE){
+                newPetInfo.humor = new PetHumor(1, "Happy");
+            }
+
+            if(currentPetInfo.state.name == "Dirty" && newPetInfo.hygiene >= Consts.HYGIENE_VALUE_CHANGE){
+                newPetInfo.state = new PetState(1, "Clean");
+            }else if(currentPetInfo.state.name == "Clean" && newPetInfo.hygiene <= Consts.HYGIENE_VALUE_CHANGE){
+                newPetInfo.state = new PetState(2, "Dirty");
+            }
+
+            //Updating the database with the new values of the pet
+            await pool.query(`update user, user_pet set usr_fruits = ?, up_hungry = ?, up_happiness = ?, up_hygiene = ?, up_state_id = ?, up_humor_id = ? where up_user_id = ? and up_pet_id = ?`, [userInfo.fruits, newPetInfo.hungry, newPetInfo.happiness, newPetInfo.hygiene, newPetInfo.state.id, newPetInfo.humor.id, user_id, userInfo.active_pet]);
+            return{status: 200, data: {msg: `${Action} successfuly done!`}}
         }catch(err){
             console.log(err);
             return{status: 500, data: {msg: err}}
