@@ -26,7 +26,7 @@ router.get("/current", async function (req, res, next) {
         userInfo.id = req.body.user_id;
 
         let result = await Pet.GetCurrentPetInfo(userInfo);
-        res.status(result.status).send(result.data);
+        res.status(result.status).send(result.pet);
     } catch (err) {
         console.log(err);
         res.status(500).send(err);

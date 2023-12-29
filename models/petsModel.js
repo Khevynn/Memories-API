@@ -36,8 +36,8 @@ class Pet {
                         pet.up_hungry,
                         pet.up_happiness,
                         pet.up_hygiene,
-                        new PetState(pet.ps_id, pet.ps_name),
-                        new PetHumor(pet.ph_id, pet.ph_name)
+                        pet.ps_name,
+                        pet.ph_name
                     )
                 );
             }
@@ -69,13 +69,13 @@ class Pet {
             pet.hungry = pets[0].up_hungry;
             pet.happiness = pets[0].up_happiness;
             pet.hygiene = pets[0].up_hygiene;
-            pet.state = new PetState(pets[0].ps_id, pets[0].ps_name);
-            pet.humor = new PetHumor(pets[0].ph_id, pets[0].ph_name);
+            pet.state = pets[0].ps_name;
+            pet.humor = pets[0].ph_name;
 
-            return { status: 200, data: { msg: "Successfuly Searched!", result: pet } }
+            return { status: 200, pet }
         } catch (err) {
             console.log(err);
-            return { status: 500, data: { msg: err } }
+            return { status: 500,  msg: err }
         }
     }
     
@@ -236,21 +236,6 @@ class Pet {
             console.log(err);
             return { status: 500, data: { msg: err } }
         }
-    }
-}
-
-// Aditional classes
-class PetState {
-    constructor(id, name) {
-        this.id = id;
-        this.name = name;
-    }
-}
-
-class PetHumor {
-    constructor(id, name) {
-        this.id = id;
-        this.name = name;
     }
 }
 

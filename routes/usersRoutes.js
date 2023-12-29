@@ -7,7 +7,7 @@ const { body, validationResult } = require('express-validator');
 router.get("/auth", async function (req, res, next) {
     try {
         let result = await User.Login(req.body.username, req.body.password);
-        res.status(result.status).send(result.msg);
+        res.status(result.status).send(result.data);
     } catch (err) {
         console.log(err);
         res.status(500).send(err);
@@ -15,18 +15,14 @@ router.get("/auth", async function (req, res, next) {
 });
 
 // Register
-router.post("/auth", body("username").isLength({ min: 4, max: 10 }).withMessage("Check the size of username (Minimum: 4 Maximum: 10"), async function (req, res, next) {
+router.post("/auth", async function (req, res, next) {
     try {
         let user = new User();
         user.username = req.body.username;
         user.password = req.body.password;
 
-        const valid = validationResult(req);
-        if (!valid.isEmpty())
-            return res.status(401).json(valid.array());
-
         let result = await User.Register(user);
-        res.status(result.status).send(result.msg);
+        res.status(result.status).send(result.data);
     } catch (err) {
         console.log(err);
         res.status(500).send(err);

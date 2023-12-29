@@ -15,16 +15,16 @@ class User {
             let [users] = await pool.query(`select * from user where usr_name = ?`, [username]);
 
             if (!users.length)
-                return { status: 404, msg: "User not found!" }
+                return { status: 404, data: {msg: "User not found!"} }
 
             let isPass = bcrypt.compare(password, users[0].usr_pass);
 
             if (!isPass)
-                return { status: 401, msg: "Incorrect password!" }
+                return { status: 401, data: {msg: "Incorrect password!"} }
 
-            return { status: 200, msg: "Successfuly Logged-in!" }
+            return { status: 200, data: {msg: "Successfuly Logged-in!", user_id: users[0].usr_id} }
         } catch (err) {
-            return { status: 500, msg: err }
+            return { status: 500, data: {msg: err} }
         }
     }
 
@@ -33,15 +33,15 @@ class User {
             let [users] = await pool.query(`select * from user where usr_name = ?`, [user.username]);
 
             if (users.length > 0)
-                return { status: 404, msg: "User already exists!" }
+                return { status: 404, data: {msg: "User already exists!"} }
 
             let encpass = await bcrypt.hash(user.password, 10);
 
             await pool.query(`Insert into user (usr_name, usr_pass, usr_current_pet)
                 values (?,?,0)`, [user.username, encpass]);
-            return { status: 200, msg: "Registered! You can now log in." };
+            return { status: 200, data: {msg: "Registered! You can now log in." }};
         } catch (err) {
-            return { status: 500, msg: err }
+            return { status: 500, data: {msg: err} }
         }
     }
 }
