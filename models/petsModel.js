@@ -3,10 +3,11 @@ const User = require("./usersModel");
 const Consts = require("../config/Consts");
 
 class Pet {
-    constructor(id, name, user_id, hungry, happiness, hygiene, state, humor) {
+    constructor(id, name, user_id, pet_id, hungry, happiness, hygiene, state, humor) {
         this.id = id;
         this.name = name
         this.user_id = user_id;
+        this.pet_id = pet_id;
         this.hungry = hungry;
         this.happiness = happiness;
         this.hygiene = hygiene;
@@ -33,6 +34,7 @@ class Pet {
                     new Pet(pet.up_id,
                         pet.up_pet_name,
                         pet.up_user_id,
+                        pet.up_pet_id,
                         pet.up_hungry,
                         pet.up_happiness,
                         pet.up_hygiene,
@@ -65,6 +67,8 @@ class Pet {
             // Create a new object "Pet" and set it values
             let pet = new Pet();
             pet.id = pets[0].up_id;
+            pet.user_id = pets[0].up_user_id;
+            pet.pet_id = pets[0].up_pet_id;
             pet.name = pets[0].up_pet_name;
             pet.hungry = pets[0].up_hungry;
             pet.happiness = pets[0].up_happiness;
@@ -100,9 +104,10 @@ class Pet {
             await pool.query(`insert into user_pet values (default, ?, ?, ?, 100, 100, 100, 1, 1)`, [petInfo.user_id, petInfo.id, pets[0].pet_name]);
 
             // Update the current pet of the player if he doesn't have a pet
-            [userInfo] = await pool.query(`select * from user where usr_id = ?`, [petInfo.user_id]);
+            let [user] = await pool.query(`select * from user where usr_id = ?`, [petInfo.user_id]);
 
-            if (userInfo[0].usr_current_pet == 0)
+            console.log(user[0]);
+            if (user[0].usr_current_pet == 0)
                 await pool.query(`update user set usr_current_pet = ? where usr_id = ?`, [petInfo.id, petInfo.user_id]);
 
             return { status: 200, data: { msg: "Successfuly Added!" } }

@@ -17,8 +17,7 @@ class User {
             if (!users.length)
                 return { status: 404, data: {msg: "User not found!"} }
 
-            let isPass = bcrypt.compare(password, users[0].usr_pass);
-
+            let isPass = await bcrypt.compare(password, users[0].usr_pass);
             if (!isPass)
                 return { status: 401, data: {msg: "Incorrect password!"} }
 
