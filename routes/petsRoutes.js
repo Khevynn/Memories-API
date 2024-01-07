@@ -23,7 +23,7 @@ router.get("/", async function (req, res, next) {
 router.get("/current", async function (req, res, next) {
     try {
         let userInfo = new User();
-        userInfo.id = req.body.user_id;
+        userInfo.id = req.query.user_id;
 
         let result = await Pet.GetCurrentPetInfo(userInfo);
         res.status(result.status).send(result.pet);

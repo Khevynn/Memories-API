@@ -43,6 +43,34 @@ class User {
             return { status: 500, data: {msg: err} }
         }
     }
+
+    static async GetUserInfo(user_id){
+        try {
+            let [rows] = await pool.query("Select * From user Where usr_id = ?", [user_id]);
+            if(!rows.length) return {status : 404 ,data:{ msg: "No User Found" }};
+
+            let user = new User();
+            user.id = rows[0].usr_id;
+            user.name = rows[0].usr_name;
+            user.active_pet = rows[0].usr_current_pet;
+            user.fruits = rows[0].usr_fruits;
+
+            return {status : 200 ,data: user }
+        }catch(err){
+            console.log(err);
+            return{status: 500, data: { msg: err }}
+        }
+    }
+
+    static async AddFruits(user_id){
+        try {
+            let [rows] = await pool.query("update user set usr_fruits = usr_fruits + 1 where usr_id = ?", [user_id])
+            return {status : 200 ,data: { msg: "Successfully added!" } }
+        }catch(err){
+            console.log(err);
+            return{status: 500, data: { msg: err }}
+        }
+    }
 }
 
 module.exports = User;

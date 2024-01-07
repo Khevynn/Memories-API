@@ -183,6 +183,9 @@ class Pet {
             currentPetInfo.humor = new PetHumor(pet[0].ph_id, pet[0].ph_name);
 
             let newPetInfo = new Pet();
+            newPetInfo.hungry = currentPetInfo.hungry;
+            newPetInfo.happiness = currentPetInfo.happiness;
+            newPetInfo.hygiene = currentPetInfo.hygiene;
             newPetInfo.state = currentPetInfo.state;
             newPetInfo.humor = currentPetInfo.humor;
 
@@ -200,7 +203,7 @@ class Pet {
                     userInfo.fruits--;
                     break;
                 case "Exercise":
-                    if (currentPetInfo.fitness >= 100)
+                    if (currentPetInfo.happiness >= 100)
                         return { status: 403, data: { msg: "Pet already exercised!" } }
 
                     if (currentPetInfo.hungry <= 2)
@@ -233,14 +236,34 @@ class Pet {
             } else if (currentPetInfo.state.name == "Clean" && newPetInfo.hygiene <= Consts.HYGIENE_VALUE_CHANGE) {
                 newPetInfo.state = new PetState(2, "Dirty");
             }
+            console.log(newPetInfo);
 
+            let [user] = await pool.query("select * from user, user_pet where usr_id = ? and up_user_id = usr_id and up_pet_id = usr_current_pet", [user_id]);
             // Updating the database with the new values of the pet
-            await pool.query(`update user, user_pet set usr_fruits = ?, up_hungry = ?, up_happiness = ?, up_hygiene = ?, up_state_id = ?, up_humor_id = ? where up_user_id = ? and up_pet_id = ?`, [userInfo.fruits, newPetInfo.hungry, newPetInfo.happiness, newPetInfo.hygiene, newPetInfo.state.id, newPetInfo.humor.id, user_id, userInfo.active_pet]);
+            await pool.query(`update user_pet set up_hungry = ?, up_happiness = ?, up_hygiene = ?, up_state_id = ?, up_humor_id = ? where up_id = ?`, [newPetInfo.hungry, newPetInfo.happiness, newPetInfo.hygiene, newPetInfo.state.id, newPetInfo.humor.id, user[0].up_id]);
+
+            await pool.query(`update user set usr_fruits = ? where usr_id = ?`, [userInfo.fruits, user_id]);
             return { status: 200, data: { msg: `${Action} successfuly done!` } }
         } catch (err) {
             console.log(err);
             return { status: 500, data: { msg: err } }
         }
+    }
+}
+
+
+// Aditional classes
+class PetState {
+    constructor(id, name) {
+        this.id = id;
+        this.name = name;
+    }
+}
+
+class PetHumor {
+    constructor(id, name) {
+        this.id = id;
+        this.name = name;
     }
 }
 
