@@ -2,6 +2,7 @@ require('dotenv').config();
 var express = require('express');
 var path = require('path');
 var morgan = require('morgan');
+const axios = require('axios');
 
 var app = express();
 
@@ -27,7 +28,18 @@ app.use((err, req, res, next) => {
   res.status(500).send(err);
 })
 
-const port = parseInt(process.env.port || '8080');
-app.listen(port, function () {
+
+// Call the API endpoint
+async function reduceStats() {
+  const Pets = require("./models/petsModel");
+  let result = await Pets.ReduceStats();
+  console.log(result);
+ }
+ 
+ const port = parseInt(process.env.port || '8080');
+ app.listen(port, function () {
   console.log("Server running at http://localhost:" + port);
-});
+  setInterval(() => reduceStats().catch(error => console.error("Error in reduceStats:", error)), 5 * 60 * 1000);
+ });
+
+
