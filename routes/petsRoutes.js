@@ -8,7 +8,7 @@ const { body, validationResult } = require('express-validator');
 router.get("/", async function (req, res, next) {
     try {
         let userInfo = new User();
-        userInfo.id = req.body.user_id;
+        userInfo.id = req.query.user_id;
 
         let result = await Pet.GetAllPets(userInfo);
 

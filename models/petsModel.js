@@ -43,7 +43,7 @@ class Pet {
                     )
                 );
             }
-            return { status: 200, data: { msg: "Successfuly Searched!", result: result } }
+            return { status: 200, data: { result } }
         } catch (err) {
             console.log(err);
             return { status: 500, data: { msg: err } }
@@ -139,7 +139,7 @@ class Pet {
         try {
             let [user] = await pool.query(`select * from user where usr_id = ?`, [userInfo.id]);
             if (user[0].usr_current_pet == newPetId)
-                return { status: 403, data: { msg: "That's already your current pet!" } }
+                return { status: 400, data: { msg: "That's already your current pet!" } }
 
             // Find the pet in the database
             let [pet] = await pool.query(`select * from user_pet where up_user_id = ? and up_pet_id = ?`, [userInfo.id, newPetId]);
@@ -192,7 +192,7 @@ class Pet {
             switch (Action) {
                 case "Feed":
                     if (currentPetInfo.hungry >= 100)
-                        return { status: 403, data: { msg: "Pet already fed!" } }
+                        return { status: 400, data: { msg: "Pet already fed!" } }
 
                     if (pet[0].usr_fruits <= 0)
                         return { status: 412, data: { msg: "Not enough fruits!" } }
@@ -204,7 +204,7 @@ class Pet {
                     break;
                 case "Exercise":
                     if (currentPetInfo.happiness >= 100)
-                        return { status: 403, data: { msg: "Pet already exercised!" } }
+                        return { status: 400, data: { msg: "Pet already exercised!" } }
 
                     if (currentPetInfo.hungry <= 2)
                         return { status: 412, data: { msg: "Can't exercise a hungry pet!" } }
@@ -220,7 +220,7 @@ class Pet {
                     break;
                 case "Bath":
                     if (currentPetInfo.hygiene >= 100)
-                        return { status: 403, data: { msg: "Pet already clean!" } }
+                        return { status: 400, data: { msg: "Pet already clean!" } }
 
                     newPetInfo.hygiene = currentPetInfo.hygiene + 2;
                     if (newPetInfo.hygiene > 100) newPetInfo.hygiene = 100;
