@@ -23,7 +23,7 @@ create table user_pet (
     up_pet_name VARCHAR(60),
     up_hungry int not null,
     up_happiness int not null,
-    up_fitness int not null,
+    up_hygiene int not null,
     up_state_id int not null references pet_state(ps_id),  
     up_humor_id int not null references pet_humor(ph_id),  
     primary key (up_id));
