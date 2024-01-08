@@ -110,4 +110,15 @@ router.patch("/exercise", async function (req, res, next) {
     }
 });
 
+// Change pet's name
+router.patch("/reduceStats", async function (req, res, next) {
+    try {
+        let result = await Pet.ReduceStats();
+        res.status(result.status).send(result.data);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send(err);
+    }
+});
+
 module.exports = router;

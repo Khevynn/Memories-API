@@ -252,8 +252,38 @@ class Pet {
 
     static async ReduceStats(){
         try {
+            let [pets] = await pool.query("select * from user_pet");
+            for(let pet of pets){
+                let currentPetInfo = new Pet();
+                currentPetInfo.id = pet.up_id;
+                currentPetInfo.hungry = pet.up_hungry;
+                currentPetInfo.happiness = pet.up_happiness;
+                currentPetInfo.hygiene = pet.up_hygiene;
+                currentPetInfo.state = pet.up_state_id;
+                currentPetInfo.humor = pet.up_humor_id;
 
-            
+                if(currentPetInfo.happiness > 3)
+                {
+                    currentPetInfo.happiness -= 3;
+                }
+                if(currentPetInfo.hungry > 3)
+                {
+                    currentPetInfo.hungry -= 3;
+                }
+                if(currentPetInfo.hygiene > 3)
+                {
+                    currentPetInfo.hygiene -= 3;
+                }
+                if (currentPetInfo.humor== 1 && currentPetInfo.happiness <= Consts.HAPPINESS_VALUE_CHANGE) {
+                    newPetInfo.humor = 2;
+                }
+                 if (currentPetInfo.state == 1 && currentPetInfo.hygiene <= Consts.HYGIENE_VALUE_CHANGE) {
+                    newPetInfo.state = 2;
+                }
+                await pool.query("update user_pet set up_hungry = ?, up_happiness = ?, up_hygiene = ?, up_state_id = ?, up_humor_id = ? where up_id = ?", [currentPetInfo.hungry, currentPetInfo.happiness, currentPetInfo.hygiene, currentPetInfo.state, currentPetInfo.humor, currentPetInfo.id]);
+            }
+            return{status: 200, data: {msg: "Succesfully Changed!"}}
+
         }catch(err){
             console.log(err);
         }
