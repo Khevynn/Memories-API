@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 const pool = require("../config/database");
-const Pet = require('./petsModel');
 
 class User {
     constructor(id, username, password, active_pet, fruits) {

@@ -249,6 +249,15 @@ class Pet {
             return { status: 500, data: { msg: err } }
         }
     }
+
+    static async ReduceStats(){
+        try {
+
+            
+        }catch(err){
+            console.log(err);
+        }
+    }
 }
 
 
