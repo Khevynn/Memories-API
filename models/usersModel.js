@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const pool = require("../config/database");
+const Pet = require('./petsModel');
 
 class User {
     constructor(id, username, password, active_pet, fruits) {
@@ -38,6 +39,12 @@ class User {
 
             await pool.query(`Insert into user (usr_name, usr_pass, usr_current_pet)
                 values (?,?,0)`, [user.username, encpass]);
+            
+            let [userInfo] = await pool.query("select * from user where usr_name = ?", user.username);
+            let [pets] = await pool.query(`select * from pet where pet_id = 1`);
+
+            await pool.query(`insert into user_pet values (default, ?, ?, ?, 100, 100, 100, 1, 1)`, [userInfo[0].usr_id, 1, pets[0].pet_name]);
+            await pool.query("update user set usr_current_pet = ? where usr_id = ?", [1, userInfo[0].usr_id])
             return { status: 200, data: {msg: "Registered! You can now log in." }};
         } catch (err) {
             return { status: 500, data: {msg: err} }
